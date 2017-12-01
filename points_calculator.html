@@ -1,0 +1,173 @@
+<script>
+function strings_to_constants(acc, item) {
+	acc[item] = item;
+	return acc;
+}
+// charms
+var c = ["universal_good", "charms_x2", "gems_x1", "spices_x1", "beasts_x1", "weapons_x1", 
+  "unicorn_x2", "phoenix_x2", "spider_x2", "sea_serpent_x2",
+  "mint_cloves_x4", "mint_anise_x4", "mint_chili_x4", "lotus_anise_x4",
+  "cloves_lotus_x4", "cloves_juniper_x4", "juniper_chili_x4",
+  "anise_juniper_x4", "chili_lotus_x4",
+  "katar_x2", "boomerang_x2", "pingu_x2", "shuriken_x2",
+  "five_goods_x4", "three_beasts_x4", "gem_spinner", "counter_weapon"].reduce(strings_to_constants, {});
+/*
+var c_count = { 
+	c.universal_good: 4,
+	c.counter_weapon: 2,
+	c.charms_x2: 3,
+	c.gems_x1: 3,
+	c.spices_x1: 3,
+	c.beasts_x1: 3,
+	c.weapons_x1: 3,
+	c.unicorn_x2: 2, 
+	c.phoenix_x2: 2,
+	c.spider_x2: 2,
+	c.sea_serpent_x2: 2,
+	
+	c.five_goods_x4: 2,
+	c.three_beasts_x4: 2,
+	c.katar_x2: 1,
+	c.pingu_x2: 1,
+	c.boomerang_x2: 1,
+	c.shuriken_x2: 1,
+	c.gem_spinner: 2,
+}; */
+
+// spices
+var s = ["anise","mint","chili","juniper","lotus","cloves"].reduce(strings_to_constants, {});
+// beasts
+var beast_names = ["unicorn","phoenix","spider","sea_serpent"];
+var b = beast_names.reduce(strings_to_constants, {});
+// weapons
+var w = ["katar","pingu","boomerang","shuriken"].reduce(strings_to_constants, {});
+
+// card encodings
+// katar8 means katar +2 +2, katar2 means katar 0 +2 etc.
+var cards_deck = {
+	0: [c.three_beasts_x4],
+	1: [c.spices_x1, 6, s.chili, b.phoenix, w.katar + 5],
+	8: [c.universal_good, 3, s.mint, b.sea_serpent, w.katar + 5],
+	11: [c.gems_x1, 5, s.cloves, b.sea_serpent, w.katar + 2],
+	12: [c.five_goods_x4, 2, s.chili, b.unicorn, w.katar + 2],
+	20: [c.universal_good, 5, s.anise, b.spider, w.boomerang + 5],
+	26: [c.gems_x1, 2, s.juniper, b.spider, w.pingu + 5],
+	27: [c.phoenix_x2, 5, s.chili, b.sea_serpent, w.pingu + 9],
+	29: [c.sea_serpent_x2, 2, s.mint, b.phoenix, w.pingu + 6],	
+	36: [c.universal_good, 7, s.lotus, b.phoenix, w.pingu + 2],
+	37: [c.shuriken_x2, 5, s.juniper, b.phoenix, w.shuriken + 9],
+	41: [c.unicorn_x2, 7, s.cloves, b.sea_serpent, w.shuriken + 6],
+	46: [c.universal_good, 1, s.juniper, b.unicorn, w.shuriken + 8],
+	47: [c.gem_spinner, 1, s.mint, b.sea_serpent, w.shuriken + 2],
+}
+var good_types = {
+	"gems": 1,
+	"spices": 2,
+	"beasts": 3,
+	"weapons": 4
+}
+var spice_points = [0, 2, 4, 8, 12, 20, 30];
+function classify_helper(acc, good_card) {
+	var good = cards_deck[good_card][good_types[this]];
+	if (acc[good] !== undefined) {
+		acc[good]++;
+	} else {
+		acc[good] = 1;
+	}
+	return acc;	
+}
+function classify(cards, good_name) {
+	return cards[good_types[good_name]].reduce(classify_helper.bind(good_name), {});
+}
+function pick_beast(beasts1, beasts0) {
+	var most_numerous = beast_names.reduce(function (acc2, good) {
+		if (beasts1[good] > acc2.quantity && !acc2.used[good]) {
+			acc2.quantity = beasts1[good];
+			acc2.bname = good;
+		}
+		return acc2;
+	}, {quantity:0,used:beasts0});
+	if (most_numerous.quantity > 0) {
+		beasts1[most_numerous.bname]--;
+		beasts0[most_numerous.bname] = 1;
+	} else {
+		return false;
+	}
+	return true;	
+}
+function beast_counter(beasts1) {
+	var beasts0 = {};
+	if (!pick_beast(beasts1, beasts0))
+		return false;
+	if (!pick_beast(beasts1, beasts0))
+		return false;
+	if (!pick_beast(beasts1, beasts0))
+		return false;
+	return true;
+}
+
+function count_points(players, func_beasts) {
+	return players.reduce(function (acc, cards) {
+		var beasts = classify(cards, "beasts");
+		var spices = classify(cards, "spices");
+		console.log(beasts);
+		console.log(spices);
+		var total_points = cards[0].reduce(function (acc1, charm_card) {
+			var charm = cards_deck[charm_card][0];
+			console.log(charm);
+			if (charm === c.universal_good) {
+				throw "Universal goods should be converted to chosen goods";
+			} else if (charm === c.charms_x2) {
+				acc1.points += cards[0].length * 2;				
+			} else if (charm.endsWith("_x2")) {
+				var good_name = charm.substr(0, charm.length - 3);
+				acc1.points += (beasts[good_name] || 0)*2;
+				// TODO weapons _x2
+			} else if (charm.endsWith("_x4")) {
+				if (charm === c.five_goods_x4) {
+					// min number of each good kind multiplied by 4
+					acc1.points += cards.reduce(function (acc2, goods) {
+						acc2 = Math.min(acc2, goods.length);
+						return acc2;
+					}, 12) * 4;
+				} else if (charm === c.three_beasts_x4) {
+					// how many times can we pick 3 different beasts?
+					var beasts1 = Object.assign({}, beasts);
+					if (beast_counter(beasts1)) {
+						acc1.points += 4;
+						console.log(beasts1);
+						if (beast_counter(beasts1)) {
+							acc1.points += 4;
+							console.log(beasts1);
+							if (beast_counter(beasts1)) {
+								acc1.points += 4;
+							}
+						}
+					}
+					console.log(beasts1);
+				} else {
+					// combination of spices
+				}
+			} else if (charm.endsWith("_x1")) {
+				var good_type = charm.substr(0, charm.length - 3);	
+				// console.log(good_type);
+				acc1.points += cards[good_types[good_type]].length;
+			} else if (charm === c.gem_spinner) {
+				acc1.spinner = true;
+			}
+			console.log("charm points=" + acc1.points);
+			return acc1;
+		}, {spinner: false, points: 0});
+		console.log("charm points total=" + total_points.points);
+		var gems = classify(cards, "gems");
+		var gem_points = 0;
+		// spices
+		total_points.points += spice_points[Object.keys(spices).length];
+		console.log("total points=" + total_points.points);
+		acc.push([total_points, gems]);
+		return acc;
+	}, []);
+}
+
+console.log(count_points([[[27, 29, 0, 1], [37], [27, 1, 8], [11, 12, 20, 26, 36, 29, 41, 47, 46], []]]));
+</script>
