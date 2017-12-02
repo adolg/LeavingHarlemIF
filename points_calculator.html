@@ -43,7 +43,7 @@ var b = beast_names.reduce(strings_to_constants, {});
 var w = ["katar","pingu","boomerang","shuriken"].reduce(strings_to_constants, {});
 
 // card encodings
-// katar8 means katar +2 +2, katar2 means katar 0 +2 etc.
+// katar10 means katar +2 +2, katar2 means katar 0 +2 etc.
 var cards_deck = {
 	0: [c.three_beasts_x4],
 	1: [c.spices_x1, 6, s.chili, b.phoenix, w.katar + 5],
@@ -53,10 +53,13 @@ var cards_deck = {
 	20: [c.universal_good, 5, s.anise, b.spider, w.boomerang + 5],
 	26: [c.gems_x1, 2, s.juniper, b.spider, w.pingu + 5],
 	27: [c.phoenix_x2, 5, s.chili, b.sea_serpent, w.pingu + 9],
-	29: [c.sea_serpent_x2, 2, s.mint, b.phoenix, w.pingu + 6],	
+	29: [c.sea_serpent_x2, 2, s.mint, b.phoenix, w.pingu + 6],
+	30: [c.mint_chili_x4, 4, s.cloves, b.phoenix, w.pingu + 6],
+	35: [c.mint_anise_x4, 1, s.chili, b.spider, w.pingu + 2],
 	36: [c.universal_good, 7, s.lotus, b.phoenix, w.pingu + 2],
 	37: [c.shuriken_x2, 5, s.juniper, b.phoenix, w.shuriken + 9],
 	41: [c.unicorn_x2, 7, s.cloves, b.sea_serpent, w.shuriken + 6],
+	42: [c.chili_lotus_x4, 5, s.mint, b.spider, w.shuriken + 6],
 	46: [c.universal_good, 1, s.juniper, b.unicorn, w.shuriken + 8],
 	47: [c.gem_spinner, 1, s.mint, b.sea_serpent, w.shuriken + 2],
 }
@@ -67,8 +70,19 @@ var good_types = {
 	"weapons": 4
 }
 var spice_points = [0, 2, 4, 8, 12, 20, 30];
+function weapon_stats(good) {
+	var strength = good.endsWith("10") ? 10 : parseInt(good.substr(good.length - 1, good.length), 10);
+	return {
+		wname: good.substr(0, good.length - (strength === 10 ? 2 : 1)),
+		wvalue: [strength / 4 | 0, strength % 4]
+	};
+}
 function classify_helper(acc, good_card) {
-	var good = cards_deck[good_card][good_types[this]];
+	var good_index = good_types[this];
+	var good = cards_deck[good_card][good_index];
+	if (good_index === 4) {
+		good = weapon_stats(good).wname;
+	}
 	if (acc[good] !== undefined) {
 		acc[good]++;
 	} else {
@@ -97,21 +111,105 @@ function pick_beast(beasts1, beasts0) {
 }
 function beast_counter(beasts1) {
 	var beasts0 = {};
-	if (!pick_beast(beasts1, beasts0))
-		return false;
-	if (!pick_beast(beasts1, beasts0))
-		return false;
-	if (!pick_beast(beasts1, beasts0))
-		return false;
+	for (var i = 0; i < 3; i++) {
+		if (!pick_beast(beasts1, beasts0))
+			return false;
+	}
 	return true;
 }
+var beast_memos = {
+	3: function (beast_cards, beasts) {
+		var threesomes = [
+			{spider: 2, sea_serpent: 1},
+			{phoenix: 2, spider: 1},
+			{unicorn: 2, phoenix: 1},
+			{sea_serpent: 2, unicorn: 1}
+		];
 
-function count_points(players, func_beasts) {
+		var beasts1 = Object.assign({
+			contains: function (threesome) {
+				function check_item(acc, item) {
+					acc &= ((threesome[item] <= this[item]) ? 1 : 0);
+					return acc;
+				}
+				function remove_item(beasts, item) {
+					if (beasts[item]) {
+						beasts[item] -= threesome[item];
+					}
+				}
+				var keys = Object.keys(threesome);
+				var found = keys.reduce(check_item.bind(this), 1);
+				if (found) {
+					remove_item(this, keys[0]);
+					remove_item(this, keys[1]);
+				}
+				return found;
+			},
+		}, beasts);
+		function find_threesome() {
+			var has_threesome = 0, i = 0;
+			while(i < 4 && !(has_threesome = beasts1.contains(threesomes[i]))) {
+				i++;
+			}
+			return has_threesome;			
+		}
+		var has_threesome1 = beast_cards.length >= 3 ? find_threesome() : 0;
+		console.log(beasts1);
+		var has_threesome2 = beast_cards.length >= 6 ? find_threesome() : 0;
+		console.log(beasts1);
+		var has_threesome3 = beast_cards.length >= 9 ? find_threesome() : 0;
+		console.log(beasts1);
+		var tens = has_threesome1 + has_threesome2 + has_threesome3;
+		// how many pairs may be left after removing threesomes?
+		return ((beast_cards.length - tens * 3) / 2 | 0)*5 + tens*10;
+	},
+	5: function (beast_cards) {
+		var indices = {
+			phoenix: 0,
+			sea_serpent: 1,
+			spider: 2,
+			unicorn: 3
+		};
+		var matrix = [
+			[3, 3, 4, 5],
+			[5, 3, 3, 4],
+			[4, 5, 3, 3],
+			[3, 4, 5, 3]
+		];
+		var points = 0, beasts = [cards_deck[beast_cards[0]][3]];
+		console.log(beast_cards);
+		for (var i = 1; i < beast_cards.length; i++) {
+			beasts.push(cards_deck[beast_cards[i]][3]);
+			points += matrix[indices[cards_deck[beast_cards[i - 1]][3]]][indices[cards_deck[beast_cards[i]][3]]];
+		}
+		console.log(beasts);
+		return points;
+	}
+}
+
+function count_points(players, beast_memo) {
 	return players.reduce(function (acc, cards) {
 		var beasts = classify(cards, "beasts");
 		var spices = classify(cards, "spices");
+		var weapons = classify(cards, "weapons");
+		var gems = classify(cards, "gems");
 		console.log(beasts);
 		console.log(spices);
+		console.log(gems);
+		var weapons_strength = Object.keys(weapons).reduce(function (acc1, weapon) {
+			if (weapons[weapon] === 1) {
+				acc1[weapon] = cards[4].reduce(function (acc2, weapon_card) {
+					var stats = weapon_stats(cards_deck[weapon_card][4]);
+					if (stats.wname === weapon) {
+						acc2 = stats.wvalue;
+					}
+					return acc2;
+				}, [0, 0])
+			}
+			return acc1;
+		}, {});
+		console.log(weapons);
+		
 		var total_points = cards[0].reduce(function (acc1, charm_card) {
 			var charm = cards_deck[charm_card][0];
 			console.log(charm);
@@ -122,7 +220,12 @@ function count_points(players, func_beasts) {
 			} else if (charm.endsWith("_x2")) {
 				var good_name = charm.substr(0, charm.length - 3);
 				acc1.points += (beasts[good_name] || 0)*2;
-				// TODO weapons _x2
+				if (weapons_strength[good_name]) {
+					weapons_strength[good_name] = weapons_strength[good_name].reduce(function (acc2, value) {
+						acc2.push(value + 2);
+						return acc2;
+					}, []);
+				}
 			} else if (charm.endsWith("_x4")) {
 				if (charm === c.five_goods_x4) {
 					// min number of each good kind multiplied by 4
@@ -132,42 +235,44 @@ function count_points(players, func_beasts) {
 					}, 12) * 4;
 				} else if (charm === c.three_beasts_x4) {
 					// how many times can we pick 3 different beasts?
-					var beasts1 = Object.assign({}, beasts);
-					if (beast_counter(beasts1)) {
+					var beasts1 = Object.assign({}, beasts), beast_count = 0;
+					while (beast_counter(beasts1) && beast_count < 4) {
 						acc1.points += 4;
 						console.log(beasts1);
-						if (beast_counter(beasts1)) {
-							acc1.points += 4;
-							console.log(beasts1);
-							if (beast_counter(beasts1)) {
-								acc1.points += 4;
-							}
-						}
+						beast_count++;
 					}
-					console.log(beasts1);
 				} else {
 					// combination of spices
+					bonus_spices = /^([a-z]+)_([a-z]+)/.exec(charm);
+					acc1.points += Math.min(spices[bonus_spices[1]] || 0, spices[bonus_spices[2]] || 0) * 4;
+					var print_spices = {};
+					print_spices[bonus_spices[1]] = spices[bonus_spices[1]];
+					print_spices[bonus_spices[2]] = spices[bonus_spices[2]];
+					console.log(print_spices);
 				}
 			} else if (charm.endsWith("_x1")) {
 				var good_type = charm.substr(0, charm.length - 3);	
-				// console.log(good_type);
 				acc1.points += cards[good_types[good_type]].length;
 			} else if (charm === c.gem_spinner) {
 				acc1.spinner = true;
+			} else if (charm === c.counter_weapon) {
+				// choose the strongest against this player
 			}
 			console.log("charm points=" + acc1.points);
 			return acc1;
 		}, {spinner: false, points: 0});
-		console.log("charm points total=" + total_points.points);
-		var gems = classify(cards, "gems");
+		console.log(weapons_strength);
 		var gem_points = 0;
-		// spices
-		total_points.points += spice_points[Object.keys(spices).length];
+		// TODO process gem_spinner (if any) and count gem points
+		var beast_points = beast_memos[beast_memo](cards[3], beasts), points4spices = spice_points[Object.keys(spices).length];
+		total_points.points += beast_points + points4spices;
+		console.log("spice points=" + points4spices);
+		console.log("beast points=" + beast_points);
 		console.log("total points=" + total_points.points);
-		acc.push([total_points, gems]);
+		acc.push(total_points);
 		return acc;
 	}, []);
 }
 
-console.log(count_points([[[27, 29, 0, 1], [37], [27, 1, 8], [11, 12, 20, 26, 36, 29, 41, 47, 46], []]]));
+console.log(count_points([[[27, 0, 30, 37, 35, 12], [1], [27, 1], [8, 11, 12, 20, 26, 29, 42, 46], [46]]], 3));
 </script>
