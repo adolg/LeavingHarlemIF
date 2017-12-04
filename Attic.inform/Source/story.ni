@@ -410,7 +410,7 @@ After opening Hatch when actor does not know the noun:
 	continue the action.
 [FIXME it makes no sense that the long rope can be attached while player is in the Living Room, if Hatch is open, but not if it's closed!]
 [TODO either allow attaching it while standing on the gutted Sofa in the LR with the closed Hatch (too far to reach if it opens upwards), or require being in the Attic for that]
-Instead of tying the long rope to the Hatch when the long rope is not part of the Hatch:
+Instead of tying the long rope to the Hatch when the long rope is not part of the Hatch and location is Attic:
 	if the Hatch is open:
 		now the noun is part of the second noun;
 		now the description of the noun is "It's length is more than enough, so it coils on the floor.";
@@ -491,7 +491,7 @@ Chapter 6 - Breaking free to explore Attic and chest
 
 [Assuming player will be awake after Harlem, so no need to check praying in the general rule.]
 Levitating is an action applying to nothing. Understand "fly", "float", "drift", "levitate" as levitating when player is asleep. Understand "pray" as levitating.
-[TODO handle trying to fly or praying while seated on Carpet after visiting Attic: hint that it can be really a Flying Carpet, but with some use of clever machinery...]
+[TODO handle trying to fly or praying while seated on Carpet/Sofa after visiting Attic: hint that someth like sofa can be a Flying Carpet, but with some use of advanced tech]
 Check levitating during Harlem:
 	if Attic is visited, say "Your magical powers are not enough to repeat this trick. Probably it was a one-off event." instead;
 Carry out levitating during Harlem:
@@ -708,6 +708,7 @@ Secret Drawer	"Meditation on mandala can help to find concealed things."
 Chest		"What can you do, now that you have a blade?"
 Hatch		"The silver key can unlock hidden doors."
 pipe		"Contents of the sofa can be filled with an air-like substance."
+Deck		"Winning show-the-number game might get you those potentially useful cards."
 
 Instead of thinking when player knows anything during Harlem:
 	say "[bold type]You gained some knowledge...[roman type][para]";
@@ -945,13 +946,20 @@ Carry out handling card:
 				move L to the Deck;
 				if devised of Deck is handvalue of Deck:
 					say "You won!";
-					[TODO increment score: 2 points if it's the first show-the-number game, 1 point otherwise]
+					[increment score: 2 points if player won at the 1st attempt, 1 point otherwise]
+					increment the score;
+					if player knows the Deck:
+						now player doesn't know the Deck;
+					otherwise:
+						increment the score;
 					now Deck is portable;
 					now Deck is openable;
 					now player is holding the Deck;
 				otherwise:
 					say "You lost, but you may try again with a different number.";						
 					now Deck is closed;
+					[track player's unsuccessful attempt in order to later increment the score]
+					now player knows the Deck;
 				now handvalue of Deck is 0;
 				now devised of Deck is -1;
 		otherwise if player is holding mycard and cmd is "return":
