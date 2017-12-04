@@ -398,18 +398,13 @@ After opening Chest when actor does not know the noun:
 	now actor knows the noun;
 	continue the action.
 [Rule "After going .. the first time" wouldn't work here for updating quips table:
-the situation is similar to the task
-where we need to increment score only once when the Chest is opened. Player can attempt to
-open it when it's locked, and we don't stop that in Instead of or Check rules.
-Same here, player can attempt going up or down before unlocking the Hatch, so we use
-knowledge relationship the same way as with Chest]
+the situation is similar to the task where we need to increment score only once when the Chest is opened. Player can attempt to open it when it's locked, and we don't stop that in Instead of or Check rules.
+Same here, player can attempt going up or down before unlocking the Hatch, so we use knowledge relation the same way as with Chest]
 After opening Hatch when actor does not know the noun:
 	now the initial appearance of the Hatch is "[if the location is the Attic][The living room] is down from here[otherwise]From the ceiling, a long rope hangs that can be used instead of stairs[end if].";
 	update the Table of H-quips;
 	now actor knows the noun;
 	continue the action.
-[FIXME it makes no sense that the long rope can be attached while player is in the Living Room, if Hatch is open, but not if it's closed!]
-[TODO either allow attaching it while standing on the gutted Sofa in the LR with the closed Hatch (too far to reach if it opens upwards), or require being in the Attic for that]
 Instead of tying the long rope to the Hatch when the long rope is not part of the Hatch and location is Attic:
 	if the Hatch is open:
 		now the noun is part of the second noun;
@@ -708,7 +703,7 @@ Secret Drawer	"Meditation on mandala can help to find concealed things."
 Chest		"What can you do, now that you have a blade?"
 Hatch		"The silver key can unlock hidden doors."
 pipe		"Contents of the sofa can be filled with an air-like substance."
-Deck		"Winning show-the-number game might get you those potentially useful cards."
+[Deck		"Winning show-the-number game might get you those potentially useful cards."]
 
 Instead of thinking when player knows anything during Harlem:
 	say "[bold type]You gained some knowledge...[roman type][para]";
@@ -833,6 +828,7 @@ The Deck is a closed fixed in place container on the Desk. "On the Desk there is
 It has printed name "Deck of Simplified Self-knowledge Cards".
 It has description "The suits are: [list of suits]. The ranks are: zero, one, two and three. A total of [number of Self-knowledge cards in words] cards."
 It has number called handvalue. It has number called devised. The devised is -1.
+It has number called attempts. The attempts are 0.
 It has an object called last handled. The last handled is nothing.
 [restrict Deck to disallow 'manually' putting items into it]
 Instead of inserting something into the Deck when noun is not a Self-knowledge card:
@@ -840,7 +836,7 @@ Instead of inserting something into the Deck when noun is not a Self-knowledge c
 [TODO this will need to be redone if there will be any more desks in the game:]
 Understand "write at the/-- desk" or "sit at the/-- desk" as a mistake ("[if the location is Attic]Led by a sudden impulse to write, you try to establish yourself behind the desk, only to discover that there's no functional chair in the Attic[otherwise]You can't see any such thing[end if]." ).
 Understand "play solitaire/bridge", "divine my/-- fortune/fortunes/--", "augur my/-- fortune/fortunes/--", "read my/-- fortune" or "tell my/-- fortune" as a mistake ("[if player is holding the Deck]Now you know what they are for, approximately[otherwise if location is Attic and Deck is fixed in place]These cards are indeed for divination, but you must learn or remember them first[otherwise]You lack tools for that[end if].").
-Understand "cards", "card/number/-- game" or "self-knowledge" as "[Self-Knowledge Game]".
+Understand "the/-- cards", "card/number/the/-- game" or "self-knowledge" as "[Self-Knowledge Game]".
 Definition: Something is ready rather than notready if player can touch it and it is closed and it is fixed in place.
 Check asking the Nurse about "[Self-Knowledge Game]":
 	if the Deck is ready:
@@ -851,6 +847,7 @@ Check asking the Nurse about "[Self-Knowledge Game]":
 			now handvalue of the Deck is 0;
 			now devised of the Deck is a random number from 0 to 255;
 			say "'Please show me number [devised of the Deck] on four cards.'";
+			increment attempts of the Deck;
 		otherwise:
 			say "'Although having those cards is useful for your future adventures, you can do without them, if you must.'";
 		stop the action.
@@ -948,9 +945,7 @@ Carry out handling card:
 					say "You won!";
 					[increment score: 2 points if player won at the 1st attempt, 1 point otherwise]
 					increment the score;
-					if player knows the Deck:
-						now player doesn't know the Deck;
-					otherwise:
+					if attempts of the Deck is 1:
 						increment the score;
 					now Deck is portable;
 					now Deck is openable;
@@ -958,8 +953,7 @@ Carry out handling card:
 				otherwise:
 					say "You lost, but you may try again with a different number.";						
 					now Deck is closed;
-					[track player's unsuccessful attempt in order to later increment the score]
-					now player knows the Deck;
+					[now player knows the Deck;]
 				now handvalue of Deck is 0;
 				now devised of Deck is -1;
 		otherwise if player is holding mycard and cmd is "return":

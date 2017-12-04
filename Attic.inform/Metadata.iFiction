@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ifindex version="1.0" xmlns="http://babel.ifarchive.org/protocol/iFiction/">
+    <story>
+        <identification>
+            <ifid></ifid>
+            <format>glulx</format>
+        </identification>
+        <bibliographic>
+            <title>Last Schooner to Africa</title>
+            <author>Alexander Dolgunin</author>
+            <headline>A soul adventure</headline>
+            <genre>Fiction</genre>
+            <firstpublished>2017</firstpublished>
+            <language>en</language>
+            <group>Inform</group>
+        </bibliographic>
+        <cover>
+            <format>png</format>
+            <height>240</height>
+            <width>240</width>
+            <description>The cover art.</description>
+        </cover>
+        <releases>
+            <attached>
+                <release>
+                    <releasedate>2017-12-05</releasedate>
+                    <version>0</version>
+                    <compiler>Inform 7</compiler>
+                    <compilerversion>6M62</compilerversion>
+                </release>
+            </attached>
+        </releases>
+        <colophon>
+            <generator>Inform 7</generator>
+            <generatorversion>6M62</generatorversion>
+            <originated>2017-12-05</originated>
+        </colophon>
+        <glulx>
+            <serial>171205</serial>
+            <release>0</release>
+            <compiler>Inform 7 build 6M62</compiler>
+            <coverpicture>1</coverpicture>
+        </glulx>
+    </story>
+</ifindex>

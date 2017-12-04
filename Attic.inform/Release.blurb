@@ -1,0 +1,41 @@
+! Blurb file created by Inform build 6M62
+
+status "/usr/local/share/inform7/Internal/Miscellany/CblorbModel.html" "/home/adolg/Programs/Projects/IFExperiments/LeavingHarlemIF/Attic.inform/Build/StatusCblorb.html"
+
+
+! Identification
+
+project folder "/home/adolg/Programs/Projects/IFExperiments/LeavingHarlemIF/Attic.inform"
+release to "/home/adolg/Programs/Projects/IFExperiments/LeavingHarlemIF/Attic.materials/Release"
+
+! Blorb instructions
+
+storyfile leafname "Last Schooner to Africa.gblorb"
+storyfile "/home/adolg/Programs/Projects/IFExperiments/LeavingHarlemIF/Attic.inform/Build/output.ulx" include
+ifiction "/home/adolg/Programs/Projects/IFExperiments/LeavingHarlemIF/Attic.inform/Metadata.iFiction" include
+cover "/home/adolg/Programs/Projects/IFExperiments/LeavingHarlemIF/Attic.materials/Cover.png"
+picture 1 "/home/adolg/Programs/Projects/IFExperiments/LeavingHarlemIF/Attic.materials/Cover.png"
+picture 3 "/home/adolg/Programs/Projects/IFExperiments/LeavingHarlemIF/Attic.materials/Figures/kekule-benzene-snake.png"
+picture 4 "/home/adolg/Programs/Projects/IFExperiments/LeavingHarlemIF/Attic.materials/Figures/reindeer-ornament.jpg"
+picture 5 "/home/adolg/Programs/Projects/IFExperiments/LeavingHarlemIF/Attic.materials/Figures/play-if-card-700x500.png"
+
+! Placeholder variables
+
+placeholder [IFID] = ""
+placeholder [RELEASE] = "0"
+placeholder [YEAR] = "2017"
+placeholder [TITLE] = "Last Schooner to Africa"
+placeholder [AUTHOR] = "Alexander Dolgunin"
+placeholder [BLURB] = "A work of interactive fiction."
+
+! Other material to release
+
+status instruction ||&nbsp;<a href="source:story.ni#line18"><img border=0 src=inform:/doc_images/Reveal.png></a>||
+status alternative ||Using 'Release along with a website'&nbsp;<a href=inform:/doc405.html><img border=0 src=inform:/doc_images/help.png></a>||
+status alternative ||Using 'Release along with an interpreter', for in-browser play on your website&nbsp;<a href=inform:/doc406.html><img border=0 src=inform:/doc_images/help.png></a>||
+status alternative ||Using 'Release along with a file of "Such-and-Such" called "whatever.pdf"', perhaps to add a manual, or a welcoming note&nbsp;<a href=inform:/doc401.html><img border=0 src=inform:/doc_images/help.png></a>||
+status alternative ||Using 'Release along with the source text'&nbsp;<a href=inform:/doc412.html><img border=0 src=inform:/doc_images/help.png></a>||
+status alternative ||Using 'Release along with a solution'&nbsp;<a href=inform:/doc411.html><img border=0 src=inform:/doc_images/help.png></a>||
+status alternative ||Using 'Release along with the library card'&nbsp;<a href=inform:/doc412.html><img border=0 src=inform:/doc_images/help.png></a>||
+status alternative ||Using 'Release along with the introductory booklet'&nbsp;<a href=inform:/doc404.html><img border=0 src=inform:/doc_images/help.png></a>||
+status alternative ||Using 'Release along with the introductory postcard'&nbsp;<a href=inform:/doc404.html><img border=0 src=inform:/doc_images/help.png></a>||
