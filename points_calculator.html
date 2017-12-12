@@ -53,35 +53,50 @@ var w = ["katar","pingu","boomerang","shuriken"].reduce(strings_to_constants, {}
 var cards_deck = {
 	0: [c.three_beasts_x4],
 	1: [c.spices_x1, 6, s.chili, b.phoenix, w.katar + 5],
+	2: [c.spider_x2, 3, s.juniper, b.phoenix, w.katar + 5],
 	3: [c.phoenix_x2, 1, s.cloves, b.spider, w.katar + 9],
 	4: [c.katar_x2, 7, s.mint, b.spider, w.katar + 6],
 	5: [c.weapons_x1, 4, s.anise, b.unicorn, w.katar + 6],
+	6: [c.mint_cloves_x4, 8, s.lotus, b.sea_serpent, w.katar + 6],
+	7: [c.gem_spinner, 4, s.lotus, b.spider, w.katar + 5],
 	8: [c.universal_good, 3, s.mint, b.sea_serpent, w.katar + 5],
 	9: [c.charms_x2, 8, s.anise, b.phoenix, w.katar + 8],
+	10: [c.lotus_anise_x4, 7, s.juniper, b.unicorn, w.katar + 8],
 	11: [c.gems_x1, 5, s.cloves, b.sea_serpent, w.katar + 2],
 	12: [c.five_goods_x4, 2, s.chili, b.unicorn, w.katar + 2],
 	13: [c.boomerang_x2, 1, s.anise, b.sea_serpent, w.boomerang + 9],
+	14: [c.unicorn_x2, 8, s.juniper, b.spider, w.boomerang + 9],
 	15: [c.spider_x2, 5, s.lotus, b.unicorn, w.boomerang + 9],
 	16: [c.weapons_x1, 8, s.mint, b.phoenix, w.boomerang + 6],
+	17: [c.spices_x1, 2, s.cloves, b.unicorn, w.boomerang + 6],
 	18: [c.charms_x2, 7, s.chili, b.spider, w.boomerang + 6],
+	19: [c.juniper_chili_x4, 6, s.cloves, b.phoenix, w.boomerang + 5],
 	20: [c.universal_good, 5, s.anise, b.spider, w.boomerang + 5],
+	21: [c.anise_juniper_x4, 3, s.chili, b.sea_serpent, w.boomerang + 8],
+	22: [c.cloves_juniper_x4, 4, s.mint, b.unicorn, w.boomerang + 8],
 	23: [c.beasts_x1, 1, s.lotus, b.phoenix, w.boomerang + 2],
+	24: [c.five_goods_x4, 4, s.juniper, b.sea_serpent, w.boomerang + 2],
+	25: [c.spices_x1, 7, s.anise, b.sea_serpent, w.pingu + 9],
 	26: [c.gems_x1, 2, s.juniper, b.spider, w.pingu + 5],
 	27: [c.phoenix_x2, 5, s.chili, b.sea_serpent, w.pingu + 9],
 	28: [c.pingu_x2, 3, s.lotus, b.unicorn, w.pingu + 6],
 	29: [c.sea_serpent_x2, 2, s.mint, b.phoenix, w.pingu + 6],
 	30: [c.mint_chili_x4, 4, s.cloves, b.phoenix, w.pingu + 6],
+	31: [c.beasts_x1, 6, s.juniper, b.sea_serpent, w.pingu + 5],
+	32: [c.three_beasts_x4, 8, s.cloves, b.unicorn, w.pingu + 5],
 	33: [c.charms_x2, 6, s.mint, b.unicorn, w.pingu + 8],
 	34: [c.counter_weapon, 3, s.anise, b.spider, w.pingu + 8],
 	35: [c.mint_anise_x4, 1, s.chili, b.spider, w.pingu + 2],
 	36: [c.universal_good, 7, s.lotus, b.phoenix, w.pingu + 2],
 	37: [c.shuriken_x2, 5, s.juniper, b.phoenix, w.shuriken + 9],
 	38: [c.phoenix_x2, 6, s.anise, b.unicorn, w.shuriken + 9],
+	39: [c.counter_weapon, 2, s.lotus, b.sea_serpent, w.shuriken + 9],
 	40: [c.beasts_x1, 8, s.chili, b.unicorn, w.shuriken + 6],
 	41: [c.unicorn_x2, 7, s.cloves, b.sea_serpent, w.shuriken + 6],
 	42: [c.chili_lotus_x4, 5, s.mint, b.spider, w.shuriken + 6],
 	43: [c.three_beasts_x4, 6, s.lotus, b.spider, w.shuriken + 5],
 	44: [c.weapons_x1, 3, s.cloves, b.spider, w.shuriken + 5],
+	45: [c.gems_x1, 4, s.chili, b.phoenix, w.shuriken + 8],
 	46: [c.universal_good, 1, s.juniper, b.unicorn, w.shuriken + 8],
 	47: [c.gem_spinner, 1, s.mint, b.sea_serpent, w.shuriken + 2],
 	48: [c.cloves_lotus_x4, 2, s.anise, b.phoenix, w.shuriken + 2],
@@ -204,9 +219,10 @@ function count_points(players, beast_memo) {
 	}, []);
 }
 
-// console.log(count_points([[[27, 0, 30, 37, 35, 12], [1, 8], [27, 1], [11, 12, 20, 26, 29, 42], [46, 47]]], 3));
+console.log(count_points([[[27, 0, 30, 37, 35, 12], [1, 8], [27, 1], [11, 12, 20, 26, 29, 42], [46, 47]]], 3));
 // console.log(count_points([[[], [], [], [], []], [[], [], [], [], []]], 3));
 console.log(count_points([[[4], [33, 42], [5, 18, 23], [20, 34, 38, 40], [3, 37]], [[9, 16, 44], [15, 30], [47, 48], [11, 13, 28], [8, 40]]], 3));
+// console.log(count_points([[[2, 37], [4], [33, 17, 14], [8, 3, 32], [46, 10, 29]], [[18, 27], [20], [5, 24, 43], [6, 23, 35], [42, 12, 19]]], 1));
 </script>
 </head>
 

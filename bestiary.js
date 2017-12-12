@@ -22,7 +22,59 @@ function beast_counter(beasts1) {
 	}
 	return true;
 }
+var beast_checker = {
+	contains: function (tuple) {
+		function check_item(acc, item) {
+			acc &= ((tuple[item] <= this[item]) ? 1 : 0);
+			return acc;
+		}
+		function remove_item(acc, item) {
+			if (this[item]) {
+				this[item] -= tuple[item];
+			}
+		}
+		var keys = Object.keys(tuple);
+		var found = keys.reduce(check_item.bind(this), 1);
+		if (found) {
+			keys.reduce(remove_item.bind(this), 1);
+		}
+		return found;
+	},
+};
 var beast_memos = {
+	1: function (beast_cards, beasts) {
+		var tuples = [
+			{unicorn: 3},
+			{unicorn: 1, spider: 1, sea_serpent: 1},
+			{sea_serpent: 1, phoenix: 1},
+			{phoenix: 1, spider: 1},
+			{unicorn: 2},
+			{phoenix: 1},
+			{unicorn: 1}
+		], tuples_score = [12, 9, 6, 6, 6, 2, 1], tuples_size = [3, 3, 2, 2, 2, 1, 1];
+		var beasts0 = Object.assign(beast_checker, beasts);
+		function find_tuple() {
+			var has_tuple = 0, i = 0;
+			while(i < tuples.length && !(has_tuple = beasts0.contains(tuples[i]))) {
+				i++;
+			}
+			return has_tuple ? i : -1;
+		}
+		var total_points = 0, points, num_left = beast_cards.length;
+		while (true) {
+			var indtuple = find_tuple();
+			if (indtuple >= 0) {
+				points = tuples_score[indtuple];
+				num_left -= tuples_size[indtuple];
+			} else {
+				points = 0;
+			}
+			total_points += points;
+			console.log(beasts0);
+			if (!points || !num_left)
+				return total_points;
+		}
+	},
 	3: function (beast_cards, beasts) {
 		var threesomes = [
 			{spider: 2, sea_serpent: 1},
@@ -31,40 +83,21 @@ var beast_memos = {
 			{sea_serpent: 2, unicorn: 1}
 		];
 
-		var beasts1 = Object.assign({
-			contains: function (threesome) {
-				function check_item(acc, item) {
-					acc &= ((threesome[item] <= this[item]) ? 1 : 0);
-					return acc;
-				}
-				function remove_item(beasts, item) {
-					if (beasts[item]) {
-						beasts[item] -= threesome[item];
-					}
-				}
-				var keys = Object.keys(threesome);
-				var found = keys.reduce(check_item.bind(this), 1);
-				if (found) {
-					remove_item(this, keys[0]);
-					remove_item(this, keys[1]);
-				}
-				return found;
-			},
-		}, beasts);
+		var beasts1 = Object.assign(beast_checker, beasts);
 		function find_threesome() {
 			var has_threesome = 0, i = 0;
-			while(i < 4 && !(has_threesome = beasts1.contains(threesomes[i]))) {
+			while(i < threesomes.length && !(has_threesome = beasts1.contains(threesomes[i]))) {
 				i++;
 			}
 			return has_threesome;			
 		}
-		var has_threesome1 = beast_cards.length >= 3 ? find_threesome() : 0;
-		console.log(beasts1);
-		var has_threesome2 = beast_cards.length >= 6 ? find_threesome() : 0;
-		console.log(beasts1);
-		var has_threesome3 = beast_cards.length >= 9 ? find_threesome() : 0;
-		console.log(beasts1);
-		var tens = has_threesome1 + has_threesome2 + has_threesome3;
+		// var num_left = beast_cards.length, 
+		var tens = 0;
+		while (find_threesome()) {
+			console.log(beasts1);
+			// num_left -= 3;
+			tens++;
+		}
 		// how many pairs may be left after removing threesomes?
 		return ((beast_cards.length - tens * 3) / 2 | 0)*5 + tens*10;
 	},
