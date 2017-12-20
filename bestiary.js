@@ -14,9 +14,9 @@ function pick_beast(beasts1, beasts0) {
 	}
 	return true;	
 }
-function beast_counter(beasts1) {
+function beast_counter(beasts1, num_beasts) {
 	var beasts0 = {};
-	for (var i = 0; i < 3; i++) {
+	for (var i = 0; i < num_beasts; i++) {
 		if (!pick_beast(beasts1, beasts0))
 			return false;
 	}
@@ -41,41 +41,62 @@ var beast_checker = {
 		return found;
 	},
 };
+function memo(tuples, beasts, tuples_score, tuples_size, memo4) {
+	var beasts0 = Object.assign(beast_checker, beasts);
+	function find_tuple() {
+		var has_tuple = 0, i = 0;
+		while(i < tuples.length && !(has_tuple = beasts0.contains(tuples[i]))) {
+			i++;
+		}
+		return has_tuple ? i : -1;
+	}
+	var total_points = 0, points, num_left = Object.keys(beasts).reduce(function(acc, item) {
+		acc += beasts[item];
+		return acc;
+	}, 0);
+	while (true) {
+		var indtuple = find_tuple();
+		if (indtuple >= 0) {
+			points = tuples_score[indtuple];
+			num_left -= tuples_size[indtuple];
+		} else {
+			points = 0;
+		}
+		total_points += points;
+		console.log(beasts0);
+		if (!points || !num_left) {
+			if (memo4) {
+				total_points += beast_counter(beasts0, 2) ? 4 : 0;
+				total_points += beast_counter(beasts0, 1) ? 2 : 0;
+			}
+			return total_points;
+		}
+	}
+}
+function memo1(tuples, beasts) {
+	return memo(tuples, beasts, [12, 9, 6, 6, 6, 2, 1], [3, 3, 2, 2, 2, 1, 1], false);
+}
+
 var beast_memos = {
-	1: function (beast_cards, beasts) {
-		var tuples = [
-			{unicorn: 3},
-			{unicorn: 1, spider: 1, sea_serpent: 1},
-			{sea_serpent: 1, phoenix: 1},
-			{phoenix: 1, spider: 1},
-			{unicorn: 2},
-			{phoenix: 1},
-			{unicorn: 1}
-		], tuples_score = [12, 9, 6, 6, 6, 2, 1], tuples_size = [3, 3, 2, 2, 2, 1, 1];
-		var beasts0 = Object.assign(beast_checker, beasts);
-		function find_tuple() {
-			var has_tuple = 0, i = 0;
-			while(i < tuples.length && !(has_tuple = beasts0.contains(tuples[i]))) {
-				i++;
-			}
-			return has_tuple ? i : -1;
-		}
-		var total_points = 0, points, num_left = beast_cards.length;
-		while (true) {
-			var indtuple = find_tuple();
-			if (indtuple >= 0) {
-				points = tuples_score[indtuple];
-				num_left -= tuples_size[indtuple];
-			} else {
-				points = 0;
-			}
-			total_points += points;
-			console.log(beasts0);
-			if (!points || !num_left)
-				return total_points;
-		}
-	},
-	3: function (beast_cards, beasts) {
+	1: memo1.bind(this, [
+		{unicorn: 3},
+		{unicorn: 1, spider: 1, sea_serpent: 1},
+		{sea_serpent: 1, phoenix: 1},
+		{phoenix: 1, spider: 1},
+		{unicorn: 2},
+		{phoenix: 1},
+		{unicorn: 1}
+	]),
+	2: memo1.bind(this, [
+		{sea_serpent: 3},
+		{unicorn: 1, phoenix: 1, sea_serpent: 1},
+		{sea_serpent: 2},
+		{phoenix: 1, spider: 1},
+		{unicorn: 1, spider: 1},
+		{spider: 1},
+		{sea_serpent: 1}
+	]),
+	3: function (beasts) {
 		var threesomes = [
 			{spider: 2, sea_serpent: 1},
 			{phoenix: 2, spider: 1},
@@ -101,7 +122,40 @@ var beast_memos = {
 		// how many pairs may be left after removing threesomes?
 		return ((beast_cards.length - tens * 3) / 2 | 0)*5 + tens*10;
 	},
-	5: function (beast_cards) {
+	4: function (beasts) {
+		var points = 0, beasts1 = Object.assign({}, beasts);
+		if (beast_counter(beasts1, 4)) {
+			points += 12;
+			if (beast_counter(beasts1, 4)) {
+				points += 12;
+			} else {
+				beasts1 = Object.assign({}, beasts);
+			}
+		} else {
+			beasts1 = Object.assign({}, beasts);
+		}
+		console.log(points);
+		if (beast_counter(beasts1, 3)) {
+			points += 8;
+			if (beast_counter(beasts1, 3)) {
+				points += 8;
+			} else {
+				beasts1 = Object.assign({}, beasts);
+			}
+		} else {
+			beasts1 = Object.assign({}, beasts);
+		}
+		console.log(points);
+		points += memo([
+			{spider: 2},
+			{phoenix: 2},
+			{unicorn: 2},
+			{sea_serpent: 2}
+		], beasts1, [6, 6, 6, 6], [2, 2, 2, 2], true);
+		console.log(points);
+		return points;
+	},
+	5: function (beasts, beast_cards) {
 		var indices = {
 			phoenix: 0,
 			sea_serpent: 1,
@@ -114,13 +168,13 @@ var beast_memos = {
 			[4, 5, 3, 3],
 			[3, 4, 5, 3]
 		];
-		var points = 0, beasts = [cards_deck[beast_cards[0]][3]];
+		var points = 0, beasts1 = [cards_deck[beast_cards[0]][3]];
 		console.log(beast_cards);
 		for (var i = 1; i < beast_cards.length; i++) {
-			beasts.push(cards_deck[beast_cards[i]][3]);
+			beasts1.push(cards_deck[beast_cards[i]][3]);
 			points += matrix[indices[cards_deck[beast_cards[i - 1]][3]]][indices[cards_deck[beast_cards[i]][3]]];
 		}
-		console.log(beasts);
+		console.log(beasts1);
 		return points;
 	}
 }

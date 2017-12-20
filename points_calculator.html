@@ -181,7 +181,7 @@ function count_points(players, beast_memo) {
 				} else if (charm === c.three_beasts_x4) {
 					// how many times can we pick 3 different beasts?
 					var beasts1 = Object.assign({}, beasts), beast_count = 0;
-					while (beast_counter(beasts1) && beast_count < 4) {
+					while (beast_counter(beasts1, 3) && beast_count < 4) {
 						acc1.points += 4;
 						console.log(beasts1);
 						beast_count++;
@@ -209,7 +209,7 @@ function count_points(players, beast_memo) {
 		console.log(weapons_strength);
 		var gem_points = 0;
 		// TODO process gem_spinner (if any) and count gem points
-		var beast_points = beast_memos[beast_memo](cards[3], beasts), points4spices = spice_points[Object.keys(spices).length];
+		var beast_points = beast_memos[beast_memo](beasts, cards[3]), points4spices = spice_points[Object.keys(spices).length];
 		total_points.points += beast_points + points4spices;
 		console.log("spice points=" + points4spices);
 		console.log("beast points=" + beast_points);
@@ -219,10 +219,13 @@ function count_points(players, beast_memo) {
 	}, []);
 }
 
-console.log(count_points([[[27, 0, 30, 37, 35, 12], [1, 8], [27, 1], [11, 12, 20, 26, 29, 42], [46, 47]]], 3));
+// console.log(count_points([[[27, 0, 30, 37, 35, 12], [1, 8], [27, 1], [11, 12, 20, 26, 29, 42], [46, 47]]], 3));
 // console.log(count_points([[[], [], [], [], []], [[], [], [], [], []]], 3));
-console.log(count_points([[[4], [33, 42], [5, 18, 23], [20, 34, 38, 40], [3, 37]], [[9, 16, 44], [15, 30], [47, 48], [11, 13, 28], [8, 40]]], 3));
+// console.log(count_points([[[4], [33, 42], [5, 18, 23], [20, 34, 38, 40], [3, 37]], [[9, 16, 44], [15, 30], [47, 48], [11, 13, 28], [8, 40]]], 3));
 // console.log(count_points([[[2, 37], [4], [33, 17, 14], [8, 3, 32], [46, 10, 29]], [[18, 27], [20], [5, 24, 43], [6, 23, 35], [42, 12, 19]]], 1));
+console.log(count_points([[[4, 27, 32], [29], [10, 17, 21], [24, 40], [6, 19, 37]], [[18, 33], [2], [3, 5, 14], [8, 20, 43, 46], [12, 36]]], 2));
+console.log(count_points([[[1, 41], [2, 45], [7, 13], [15, 35, 38, 44], [30, 47]], [[9, 23, 39, 48], [], [26, 34, 42], [25, 31], [11, 16, 28]]], 4));
+
 </script>
 </head>
 
