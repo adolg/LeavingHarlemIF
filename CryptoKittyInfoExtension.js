@@ -8,6 +8,7 @@
 // @match        *.cryptokitties.co/*
 // @match        *kittytools.herokuapp.com/*
 // @match        *kittygenerations.herokuapp.com/*
+// @match        *.kittyexplorer.com/*
 // @grant        none
 // @require      https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.18.2/babel.js
 // @require      http://code.jquery.com/jquery-3.2.1.min.js
@@ -164,7 +165,7 @@ $(document).ready(() => {
             // sort cattributes so they are grouped for easier comparison visually
             data.cattributes.sort((a, b) => orderedCattributes.indexOf(a.description) - orderedCattributes.indexOf(b.description));
 
-            finalizeOverlay(data.cattributes, element, stats);
+            finalizeOverlay(data, element, stats);
             if (hasLocalStorage) {
                 let ul = element.getElementsByClassName("extWrapper")[0];
                 let dateUTC = new Date(data.created_at);
@@ -245,10 +246,16 @@ $(document).ready(() => {
     }
 
     let cattrTypeAbbreviations = { colorbody: "cb", coloreyes: "ce"};
-    function finalizeOverlay(cattributes, element, stats) {
+    function finalizeOverlay(data, element, stats) {
+        let cattributes = data.cattributes;
         let ul = element.getElementsByClassName("extAttUl")[0];
         ul.classList.remove("extBounce");
         ul.innerHTML = "";
+        if (window.location.hostname == 'www.kittyexplorer.com') {
+            ul.innerHTML += "<li class='extAtt'>"+cdValueTbl[data.status.cooldown_index].toLowerCase() + " (" + data.status.cooldown_index + ")"+"</li>";
+        } else if (window.location.hostname == 'www.cryptokitties.co') {
+            ul.innerHTML += "<li class='extAtt'>Gen " + stats.gen + " " + cdValueTbl[data.status.cooldown_index].toLowerCase() + " (" + data.status.cooldown_index + ")"+"</li>";
+        }
         for (let x in cattributes) {
             if (cattributes[x]) {
                 let background_color = getColor(cattributes[x].description)[0];
@@ -277,6 +284,7 @@ $(document).ready(() => {
             foundId.push(id);
             let mainSite = window.location.hostname == 'www.cryptokitties.co';
             let toolsSite = window.location.hostname == 'kittytools.herokuapp.com';
+            let explorerSite = window.location.hostname == 'www.kittyexplorer.com';
             let element = mainSite ? nativeElement.getElementsByClassName('KittyCard')[0] : toolsSite ? nativeElement.parentElement : nativeElement;
             if (element) {
                 let stats = {"id": curId, "fast":false, "gen": false, "cd": false};
@@ -292,7 +300,7 @@ $(document).ready(() => {
                     stats.gen = nativeElement.getElementsByClassName('KittyCard-subname')[0].innerText.split('Gen ').pop();
                 }
                 element.innerHTML += "<div class='extWrapper'><ul style='list-style: none;' class='extBounce extAttUl'>🐈</ul></div>";
-                if (toolsSite) {
+                if (toolsSite || explorerSite) {
                     let wrapper = element.getElementsByClassName("extWrapper")[0];
                     wrapper.classList.remove("extWrapper");
                     wrapper.classList.add("extKittyWrapper");
