@@ -1,3 +1,5 @@
+var beast_names = ["unicorn","phoenix","spider","sea_serpent"];
+
 function pick_beast(beasts1, beasts0) {
 	var most_numerous = beast_names.reduce(function (acc2, good) {
 		if (beasts1[good] > acc2.quantity && !acc2.used[good]) {
@@ -40,9 +42,21 @@ var beast_checker = {
 		}
 		return found;
 	},
+	clean: function () {
+		var checker = this;
+		beast_names.reduce(function(acc, item) {
+			delete checker[item];
+			// console.log(item);
+			return acc;
+		}, 0);		
+	}
 };
-function memo(tuples, beasts, tuples_score, tuples_size, memo4) {
+function memo(tuples, beasts, tuples_score, tuples_size) {
+	// clean the beast_checker global object before reuse
+	beast_checker.clean();
+
 	var beasts0 = Object.assign(beast_checker, beasts);
+	console.log(beasts0);
 	function find_tuple() {
 		var has_tuple = 0, i = 0;
 		while(i < tuples.length && !(has_tuple = beasts0.contains(tuples[i]))) {
@@ -63,18 +77,17 @@ function memo(tuples, beasts, tuples_score, tuples_size, memo4) {
 			points = 0;
 		}
 		total_points += points;
+		console.log("memo:")
+		console.log(beasts);
 		console.log(beasts0);
+		// var beasts1 = Object.assign({}, beasts0);
 		if (!points || !num_left) {
-			if (memo4) {
-				total_points += beast_counter(beasts0, 2) ? 4 : 0;
-				total_points += beast_counter(beasts0, 1) ? 2 : 0;
-			}
-			return total_points;
+			return [total_points, beasts0];
 		}
 	}
 }
 function memo1(tuples, beasts) {
-	return memo(tuples, beasts, [12, 9, 6, 6, 6, 2, 1], [3, 3, 2, 2, 2, 1, 1], false);
+	return memo(tuples, beasts, [12, 9, 6, 6, 6, 2, 1], [3, 3, 2, 2, 2, 1, 1])[0];
 }
 
 var beast_memos = {
@@ -103,6 +116,7 @@ var beast_memos = {
 			{unicorn: 2, phoenix: 1},
 			{sea_serpent: 2, unicorn: 1}
 		];
+		beast_checker.clean();
 
 		var beasts1 = Object.assign(beast_checker, beasts);
 		function find_threesome() {
@@ -123,35 +137,65 @@ var beast_memos = {
 		return ((beast_cards.length - tens * 3) / 2 | 0)*5 + tens*10;
 	},
 	4: function (beasts) {
-		var points = 0, beasts1 = Object.assign({}, beasts);
-		if (beast_counter(beasts1, 4)) {
+		var points = 0, beasts1 = [Object.assign({}, beasts), Object.assign({}, beasts)];
+		if (beast_counter(beasts1[beasts1.length - 1], 4)) {
 			points += 12;
-			if (beast_counter(beasts1, 4)) {
+			beasts1.push(Object.assign({}, beasts1[beasts1.length - 1]));
+			if (beast_counter(beasts1[beasts1.length - 1], 4)) {
 				points += 12;
+				beasts1.push(Object.assign({}, beasts1[beasts1.length - 1]));
 			} else {
-				beasts1 = Object.assign({}, beasts);
+				beasts1.pop();
 			}
 		} else {
-			beasts1 = Object.assign({}, beasts);
+			beasts1.pop();
 		}
 		console.log(points);
-		if (beast_counter(beasts1, 3)) {
-			points += 8;
-			if (beast_counter(beasts1, 3)) {
-				points += 8;
-			} else {
-				beasts1 = Object.assign({}, beasts);
-			}
-		} else {
-			beasts1 = Object.assign({}, beasts);
-		}
-		console.log(points);
-		points += memo([
+		console.log(beasts1[beasts1.length - 1]);
+		console.log(beasts1);
+		// beasts1.push(Object.assign({}, beasts1[beasts1.length - 1]));
+		var memo_points = memo([
 			{spider: 2},
 			{phoenix: 2},
 			{unicorn: 2},
 			{sea_serpent: 2}
-		], beasts1, [6, 6, 6, 6], [2, 2, 2, 2], true);
+		], beasts1[beasts1.length - 1], [6, 6, 6, 6], [2, 2, 2, 2]);
+		if (!memo_points) {
+			// beasts1.pop();
+		}
+		points += memo_points[0];
+		console.log(points);
+		console.log(memo_points[1]);
+		beasts1.push(Object.assign({}, memo_points[1]));
+		beasts1.push(Object.assign({}, memo_points[1]));
+		if (beast_counter(beasts1[beasts1.length - 1], 3)) {
+			points += 8;
+			beasts1.push(Object.assign({}, beasts1[beasts1.length - 1]));
+			if (beast_counter(beasts1[beasts1.length - 1], 3)) {
+				points += 8;
+				beasts1.push(Object.assign({}, beasts1[beasts1.length - 1]));
+				if (beast_counter(beasts1[beasts1.length - 1], 3)) {
+					points += 8;
+					beasts1.push(Object.assign({}, beasts1[beasts1.length - 1]));
+				} else {
+					beasts1.pop();
+				}
+			} else {
+				beasts1.pop();
+			}
+		} else {
+			beasts1.pop();
+		}
+		console.log(points);
+		console.log(beasts1[beasts1.length - 1]);
+		beasts1.push(Object.assign({}, beasts1[beasts1.length - 1]));
+		if (beast_counter(beasts1[beasts1.length - 1], 2)) {
+			points += 4;
+		} else {
+			beasts1.pop();
+		}
+		console.log(points);
+		points += beast_counter(beasts1[beasts1.length - 1], 1) ? 2 : 0;
 		console.log(points);
 		return points;
 	},

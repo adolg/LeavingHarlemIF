@@ -43,7 +43,7 @@ var c_count = {
 // spices
 var s = ["anise","mint","chili","juniper","lotus","cloves"].reduce(strings_to_constants, {});
 // beasts
-var beast_names = ["unicorn","phoenix","spider","sea_serpent"];
+
 var b = beast_names.reduce(strings_to_constants, {});
 // weapons
 var w = ["katar","pingu","boomerang","shuriken"].reduce(strings_to_constants, {});
@@ -223,8 +223,8 @@ function count_points(players, beast_memo) {
 // console.log(count_points([[[], [], [], [], []], [[], [], [], [], []]], 3));
 // console.log(count_points([[[4], [33, 42], [5, 18, 23], [20, 34, 38, 40], [3, 37]], [[9, 16, 44], [15, 30], [47, 48], [11, 13, 28], [8, 40]]], 3));
 // console.log(count_points([[[2, 37], [4], [33, 17, 14], [8, 3, 32], [46, 10, 29]], [[18, 27], [20], [5, 24, 43], [6, 23, 35], [42, 12, 19]]], 1));
-console.log(count_points([[[4, 27, 32], [29], [10, 17, 21], [24, 40], [6, 19, 37]], [[18, 33], [2], [3, 5, 14], [8, 20, 43, 46], [12, 36]]], 2));
-console.log(count_points([[[1, 41], [2, 45], [7, 13], [15, 35, 38, 44], [30, 47]], [[9, 23, 39, 48], [], [26, 34, 42], [25, 31], [11, 16, 28]]], 4));
+// console.log(count_points([[[4, 27, 32], [29], [10, 17, 21], [24, 40], [6, 19, 37]], [[18, 33], [2], [3, 5, 14], [8, 20, 43, 46], [12, 36]]], 2));
+console.log(count_points([,[[1, 41], [2, 45], [7, 13], [15, 35, 38, 44, 45, 47, 48], [30]], [[9, 23, 39, 48], [], [26, 34, 42], [25, 31], [11, 16, 28]]], 4));
 
 </script>
 </head>
