@@ -164,6 +164,7 @@ $(document).ready(() => {
 
             // sort cattributes so they are grouped for easier comparison visually
             data.cattributes.sort((a, b) => orderedCattributes.indexOf(a.description) - orderedCattributes.indexOf(b.description));
+            stats.gen = data.generation;
 
             finalizeOverlay(data, element, stats);
             if (hasLocalStorage) {
@@ -297,7 +298,7 @@ $(document).ready(() => {
                     if (speed) {
                         stats.fast = cooldownTable.indexOf(speed.innerText);
                     }
-                    stats.gen = nativeElement.getElementsByClassName('KittyCard-subname')[0].innerText.split('Gen ').pop();
+                    //stats.gen = nativeElement.getElementsByClassName('KittyCard-subname')[0].innerText.split('Gen ').pop();
                 }
                 element.innerHTML += "<div class='extWrapper'><ul style='list-style: none;' class='extBounce extAttUl'>🐈</ul></div>";
                 if (toolsSite || explorerSite) {
