@@ -1,4 +1,4 @@
-// Donations are welcome & appreciated!: 0x9aEa53364bBaE27Ff83Ce3f2807c8BbcC71a3FC6
+﻿// Donations are welcome & appreciated!: 0x9aEa53364bBaE27Ff83Ce3f2807c8BbcC71a3FC6
 // ==UserScript==
 // @name         Crypto Kitty Info Extension
 // @namespace    https://github.com/HaJaeKyung/KittyExtension
@@ -35,7 +35,7 @@ $(document).ready(() => {
     $("head").append("<style> .extArrowDown {  margin-left: 2px; margin-top: 6px; float: right; border: solid Red; border-width: 0 3px 3px 0; display: inline-block; padding: 3px; transform: rotate(45deg); -webkit-transform: rotate(45deg);} </style>");
     $("body").append("<ul class='extPercentList '></ul>");
 
-    const version = "0.36";
+    const version = "0.37";
     let orderedCattributes = [];
     let foundId = [];
     let curCat = 'n/a';
@@ -159,14 +159,15 @@ $(document).ready(() => {
         return [color, count];
     }
 
-    function requestId(element, stats) {
-        $.getJSON( "https://api.cryptokitties.co/kitties/"+stats.id, data => {
+    function requestId(element, catId) {
+        $.getJSON( "https://api.cryptokitties.co/kitties/"+catId, data => {
 
             // sort cattributes so they are grouped for easier comparison visually
             data.cattributes.sort((a, b) => orderedCattributes.indexOf(a.description) - orderedCattributes.indexOf(b.description));
-            stats.gen = data.generation;
+            //stats.gen = data.generation;
+            let gen = data.generation;
 
-            finalizeOverlay(data, element, stats);
+            finalizeOverlay(data, element);
             if (hasLocalStorage) {
                 let ul = element.getElementsByClassName("extWrapper")[0];
                 let dateUTC = new Date(data.created_at);
@@ -176,10 +177,10 @@ $(document).ready(() => {
                     timeZone: 'UTC', hour12: false
                 };
                 let query = "?orderBy=current_price&orderDirection=asc&search=";
-                let totalGen = ' gen:'+stats.gen;
-                if (stats.gen >= 10) {
-                    totalGen += ' gen:'+(stats.gen-1)+' gen:';
-                    totalGen += parseInt(stats.gen)+1;
+                let totalGen = ' gen:'+gen;
+                if (gen >= 10) {
+                    totalGen += ' gen:'+(gen-1)+' gen:';
+                    totalGen += parseInt(gen)+1;
                 }
                 totalGen += " cooldown:" + cdValueTbl[data.status.cooldown_index].toLowerCase();
                 // find the most rare cattribute
@@ -196,28 +197,35 @@ $(document).ready(() => {
                 let sorting = "&sorting=cheap";
 
                 ul.innerHTML += "<ul class='extAttUl' onclick='searchSimilarKitties(event, &quot;"+ query + search + sorting + "&quot;)'><li style='list-style: none;' class='extAtt'><span style='font-weight: 500;'>Born:</span> " + dateUTC.toLocaleString('en-US', options) + "</li></ul>";
+                /*
                 if (data.children.length === 0) {
                     if (ul) {
                         ul.innerHTML += "<ul class='extAttUl'><li style='list-style: none;' class='extAtt'><span style='font-weight: 500;'>&nbsp;virgin&nbsp;</span></li></ul>";
                     }
-                }
+                }*/
 
                 if (!data.status.is_ready) {
-                    let note = element.getElementsByClassName('KittyStatus-note');
+                    let note = element.getElementsByClassName('KittyStatus');
                     if (note.length !== 0) {
                         let cd = (((data.status.cooldown - Date.now())/6000/600));
                         let time = timeDisplay(cd * 3600);
-                        note[note[1] ? 1 : 0].textContent = time;
+                        let node1 = document.createElement("div");
+                        node1.setAttribute("class", "KittyStatus-item");
+                        note[0].appendChild(node1);
+                        let node2 = document.createElement("span");
+                        node2.setAttribute("class", "KittyStatus-itemText");
+                        node2.textContent = time;
+                        node1.appendChild(node2);
                     }
                 }
-                saveStorage(stats.id, data.cattributes);
+                saveStorage(catId, data.cattributes);
             }
         }).fail(() => {
             //let ul = element.getElementsByClassName("extAttUl")[0];
             //ul.classList.remove("extBounce");
             //ul.innerHTML = "😿";
             setTimeout(() => {
-                requestId(element, stats);
+                requestId(element, catId);
             }, 1000);
         });
     }
@@ -246,17 +254,18 @@ $(document).ready(() => {
         }
     }
 
-    let cattrTypeAbbreviations = { colorbody: "cb", coloreyes: "ce"};
-    function finalizeOverlay(data, element, stats) {
+    let cattrTypeAbbreviations = { colorbody: "cb", coloreyes: "ce" }, cdAbbrTbl = ["f","sw","sw","sn","sn","b","b","p","p","sl","sl","slg","slg","cat"];
+    function finalizeOverlay(data, element) {
         let cattributes = data.cattributes;
         let ul = element.getElementsByClassName("extAttUl")[0];
         ul.classList.remove("extBounce");
-        ul.innerHTML = "";
+        ul.innerHTML = "<li class='extAtt'>g" + data.generation + " " + cdAbbrTbl[data.status.cooldown_index] + data.status.cooldown_index + " k" + data.children.length + "</li>";
+        /*
         if (window.location.hostname == 'www.kittyexplorer.com') {
             ul.innerHTML += "<li class='extAtt'>"+cdValueTbl[data.status.cooldown_index].toLowerCase() + " (" + data.status.cooldown_index + ")"+"</li>";
         } else if (window.location.hostname == 'www.cryptokitties.co') {
             ul.innerHTML += "<li class='extAtt'>Gen " + stats.gen + " " + cdValueTbl[data.status.cooldown_index].toLowerCase() + " (" + data.status.cooldown_index + ")"+"</li>";
-        }
+        }*/
         for (let x in cattributes) {
             if (cattributes[x]) {
                 let background_color = getColor(cattributes[x].description)[0];
@@ -288,6 +297,7 @@ $(document).ready(() => {
             let explorerSite = window.location.hostname == 'www.kittyexplorer.com';
             let element = mainSite ? nativeElement.getElementsByClassName('KittyCard')[0] : toolsSite ? nativeElement.parentElement : nativeElement;
             if (element) {
+                /*
                 let stats = {"id": curId, "fast":false, "gen": false, "cd": false};
                 if (mainSite) {
                     let status = nativeElement.getElementsByClassName('KittyCard-status')[0];
@@ -300,6 +310,7 @@ $(document).ready(() => {
                     }
                     //stats.gen = nativeElement.getElementsByClassName('KittyCard-subname')[0].innerText.split('Gen ').pop();
                 }
+                */
                 element.innerHTML += "<div class='extWrapper'><ul style='list-style: none;' class='extBounce extAttUl'>🐈</ul></div>";
                 if (toolsSite || explorerSite) {
                     let wrapper = element.getElementsByClassName("extWrapper")[0];
@@ -309,7 +320,7 @@ $(document).ready(() => {
                 if (tblNew.royalblue) {
                     setTimeout(()=> {
                         console.log('KittyExtension: Requesting - '+ id);
-                        requestId(element, stats);
+                        requestId(element, curId);
                     }, timer - Date.now());
                 }
 
