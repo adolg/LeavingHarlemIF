@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name         Crypto Kitty Info Extension
 // @namespace    https://github.com/HaJaeKyung/KittyExtension
-// @version      0.36
+// @version      0.38
 // @description  Adds stat info to the site
 // @author       HaJaeKyung
 // @match        *.cryptokitties.co/*
@@ -35,7 +35,7 @@ $(document).ready(() => {
     $("head").append("<style> .extArrowDown {  margin-left: 2px; margin-top: 6px; float: right; border: solid Red; border-width: 0 3px 3px 0; display: inline-block; padding: 3px; transform: rotate(45deg); -webkit-transform: rotate(45deg);} </style>");
     $("body").append("<ul class='extPercentList '></ul>");
 
-    const version = "0.37";
+    const version = "0.38";
     let orderedCattributes = [];
     let foundId = [];
     let curCat = 'n/a';
@@ -163,7 +163,7 @@ $(document).ready(() => {
         $.getJSON( "https://api.cryptokitties.co/kitties/"+catId, data => {
 
             // sort cattributes so they are grouped for easier comparison visually
-            data.cattributes.sort((a, b) => orderedCattributes.indexOf(a.description) - orderedCattributes.indexOf(b.description));
+            data.enhanced_cattributes.sort((a, b) => orderedCattributes.indexOf(a.description) - orderedCattributes.indexOf(b.description));
             //stats.gen = data.generation;
             let gen = data.generation;
 
@@ -184,7 +184,7 @@ $(document).ready(() => {
                 }
                 totalGen += " cooldown:" + cdValueTbl[data.status.cooldown_index].toLowerCase();
                 // find the most rare cattribute
-                let rarest = '', attr = data.cattributes.reduce(function(acc, item) {
+                let rarest = '', attr = data.enhanced_cattributes.reduce(function(acc, item) {
                     acc[item.description] = 1;
                     return acc;
                 }, {});
@@ -218,7 +218,7 @@ $(document).ready(() => {
                         node1.appendChild(node2);
                     }
                 }
-                saveStorage(catId, data.cattributes);
+                saveStorage(catId, data.enhanced_cattributes);
             }
         }).fail(() => {
             //let ul = element.getElementsByClassName("extAttUl")[0];
@@ -256,7 +256,7 @@ $(document).ready(() => {
 
     let cattrTypeAbbreviations = { colorbody: "cb", coloreyes: "ce" }, cdAbbrTbl = ["f","sw","sw","sn","sn","b","b","p","p","sl","sl","slg","slg","cat"];
     function finalizeOverlay(data, element) {
-        let cattributes = data.cattributes;
+        let cattributes = data.enhanced_cattributes;
         let ul = element.getElementsByClassName("extAttUl")[0];
         ul.classList.remove("extBounce");
         ul.innerHTML = "<li class='extAtt'>g" + data.generation + " " + cdAbbrTbl[data.status.cooldown_index] + data.status.cooldown_index + " k" + data.children.length + "</li>";
